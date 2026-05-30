@@ -77,9 +77,6 @@ export default function ProcedureSelectionScreen() {
       >
         <View style={styles.headerBlock}>
           <Text style={styles.heading}>Select Compliance Checklist</Text>
-          <Text style={styles.subheading}>
-            Choose which standard to follow for this installation.
-          </Text>
         </View>
 
         <OptionCard
