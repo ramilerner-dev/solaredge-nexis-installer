@@ -3,8 +3,9 @@ import React, { createContext, useContext, useState } from 'react';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface SiteDetails {
-  siteName: string;
   customerName: string;
+  siteName: string;
+  installerName: string;
   address: string;
   isIndoor: boolean;
   roomSizeConfirmed: boolean;
@@ -48,9 +49,10 @@ interface InstallationContextType {
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
 export const DEFAULT_SITE_DETAILS: SiteDetails = {
+  customerName: 'Andrea Smith',
   siteName: 'Green Valley Solar',
-  customerName: 'Carlos Mendez',
-  address: '14 Sunridge Ave, Utrecht',
+  installerName: 'John Smith',
+  address: '14 Sunridge Ave, California',
   isIndoor: true,
   roomSizeConfirmed: true,
   rainProtectedConfirmed: false,

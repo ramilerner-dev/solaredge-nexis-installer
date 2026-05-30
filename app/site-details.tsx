@@ -46,6 +46,16 @@ export default function SiteDetailsScreen() {
           {/* ── Site Information ── */}
           <Text style={styles.sectionHeader}>Site Information</Text>
 
+          <Text style={styles.fieldLabel}>Customer Name <Text style={styles.required}>*</Text></Text>
+          <TextInput
+            style={[styles.input, !siteDetails.customerName.trim() && styles.inputError]}
+            value={siteDetails.customerName}
+            onChangeText={(v) => updateSiteDetails({ customerName: v })}
+            placeholder="e.g. Andrea Smith"
+            placeholderTextColor={Colors.textMuted}
+            returnKeyType="next"
+          />
+
           <Text style={styles.fieldLabel}>Site Name <Text style={styles.required}>*</Text></Text>
           <TextInput
             style={[styles.input, !siteDetails.siteName.trim() && styles.inputError]}
@@ -56,12 +66,12 @@ export default function SiteDetailsScreen() {
             returnKeyType="next"
           />
 
-          <Text style={styles.fieldLabel}>Customer Name <Text style={styles.required}>*</Text></Text>
+          <Text style={styles.fieldLabel}>Installer Name</Text>
           <TextInput
-            style={[styles.input, !siteDetails.customerName.trim() && styles.inputError]}
-            value={siteDetails.customerName}
-            onChangeText={(v) => updateSiteDetails({ customerName: v })}
-            placeholder="e.g. Carlos Mendez"
+            style={styles.input}
+            value={siteDetails.installerName}
+            onChangeText={(v) => updateSiteDetails({ installerName: v })}
+            placeholder="e.g. John Smith"
             placeholderTextColor={Colors.textMuted}
             returnKeyType="next"
           />
@@ -71,7 +81,7 @@ export default function SiteDetailsScreen() {
             style={styles.input}
             value={siteDetails.address}
             onChangeText={(v) => updateSiteDetails({ address: v })}
-            placeholder="e.g. 14 Sunridge Ave, Utrecht"
+            placeholder="e.g. 14 Sunridge Ave, California"
             placeholderTextColor={Colors.textMuted}
             returnKeyType="next"
           />
