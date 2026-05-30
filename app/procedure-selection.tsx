@@ -79,38 +79,38 @@ export default function ProcedureSelectionScreen() {
         <AppHeader title="Checklist Selection" showBack />
       </SafeAreaView>
 
-      <View style={styles.contentArea}>
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.headerBlock}>
-            <Text style={styles.heading}>Select Compliance Checklist</Text>
-          </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.headerBlock}>
+          <Text style={styles.heading}>Select Compliance Checklist</Text>
+        </View>
 
-          <OptionCard
-            value="solaredge"
-            selected={selectedProcedure === 'solaredge'}
-            title="SolarEdge"
-            description="Official Nexis 3ph Quick Installation Guide (updated: Feb 2026)"
-            onSelect={() => setProcedure('solaredge')}
-          />
+        <OptionCard
+          value="solaredge"
+          selected={selectedProcedure === 'solaredge'}
+          title="SolarEdge"
+          description="Official Nexis 3ph Quick Installation Guide (updated: Feb 2026)"
+          onSelect={() => setProcedure('solaredge')}
+        />
 
-          <OptionCard
-            value="tpo"
-            selected={selectedProcedure === 'tpo'}
-            title="Palmetto Finance TPO"
-            description="Palmetto Finance checklist for Nexis 3ph installation (updated: TBD)"
-            disabled
-            disabledNote="Coming soon"
-            onSelect={() => {}}
-          />
-        </ScrollView>
+        <OptionCard
+          value="tpo"
+          selected={selectedProcedure === 'tpo'}
+          title="Palmetto Finance TPO"
+          description="Palmetto Finance checklist for Nexis 3ph installation (updated: TBD)"
+          disabled
+          disabledNote="Coming soon"
+          onSelect={() => {}}
+        />
 
-        {/* FAB — floats over scroll content, bottom-right */}
-        <AddCustomFab />
-      </View>
+        {/* FAB centered in the empty space below the cards */}
+        <View style={styles.fabArea}>
+          <AddCustomFab />
+        </View>
+      </ScrollView>
 
       {/* Sticky bottom button */}
       <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
@@ -135,12 +135,12 @@ const SELECTED_BG = '#EEF1F4';
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.bodyBg },
   headerSafe: { backgroundColor: Colors.headerBg },
-  contentArea: { flex: 1 },
   scroll: { flex: 1 },
   scrollContent: {
+    flexGrow: 1,        // expand to fill scroll area so fabArea gets remaining space
     padding: 16,
     gap: 12,
-    paddingBottom: 80, // leave room so FAB doesn't cover last card
+    paddingBottom: 16,
   },
 
   headerBlock: { paddingBottom: 4 },
@@ -221,11 +221,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // FAB — Add custom checklist
+  // FAB wrapper — fills remaining space and centers the button
+  fabArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 80,
+  },
   fab: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
