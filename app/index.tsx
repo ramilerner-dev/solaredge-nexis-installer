@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -37,10 +38,13 @@ function GoHeader() {
         <Ionicons name="menu" size={24} color={Colors.textWhite} />
       </TouchableOpacity>
 
-      {/* SolarEdge wordmark + version */}
+      {/* SolarEdge logo + version */}
       <View style={headerStyles.logoRow}>
-        <Text style={headerStyles.logoSolar}>solar</Text>
-        <Text style={headerStyles.logoEdge}>edge</Text>
+        <Image
+          source={require('@/assets/solaredge-logo.png')}
+          style={headerStyles.logoImage}
+          resizeMode="contain"
+        />
         <View style={headerStyles.versionPill}>
           <Text style={headerStyles.versionText}>{APP_VERSION}</Text>
         </View>
@@ -210,17 +214,10 @@ const headerStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoSolar: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.textWhite,
-    letterSpacing: 0.5,
-  },
-  logoEdge: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.accent,
-    letterSpacing: 0.5,
+  logoImage: {
+    height: 30,
+    width: 130,
+    backgroundColor: 'transparent',
   },
   versionPill: {
     backgroundColor: 'rgba(255,255,255,0.15)',
