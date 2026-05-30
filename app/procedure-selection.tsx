@@ -61,7 +61,8 @@ function OptionCard({
 function AddCustomFab() {
   return (
     <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => {}}>
-      <Text style={styles.fabText}>+ Custom Checklist</Text>
+      <Ionicons name="add" size={18} color={Colors.textSecondary} />
+      <Text style={styles.fabText}>Add custom checklist</Text>
     </TouchableOpacity>
   );
 }
