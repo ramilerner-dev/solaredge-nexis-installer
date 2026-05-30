@@ -39,9 +39,12 @@ export default function SiteDetailsScreen() {
   const { siteDetails, updateSiteDetails } = useInstallation();
 
   const roomSizeBlocking = siteDetails.isIndoor && !siteDetails.roomSizeConfirmed;
-  const isValid = isSiteDetailsValid(siteDetails) && !roomSizeBlocking;
+  const rainBlocking = !siteDetails.isIndoor && !siteDetails.rainProtectedConfirmed;
+  const isValid = isSiteDetailsValid(siteDetails) && !roomSizeBlocking && !rainBlocking;
   const errorMsg = roomSizeBlocking
     ? 'Room size ≥ 2,119 ft³ must be confirmed for indoor installations.'
+    : rainBlocking
+    ? 'Rain protected location must be confirmed for outdoor installations.'
     : siteDetailsError(siteDetails);
 
   const handleNext = () => {
@@ -148,6 +151,29 @@ export default function SiteDetailsScreen() {
                 {!siteDetails.roomSizeConfirmed && (
                   <Text style={styles.checkWarning}>
                     ⚠️ Required to continue indoor installation
+                  </Text>
+                )}
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* Rain protection — only shown for outdoor */}
+          {!siteDetails.isIndoor && (
+            <TouchableOpacity
+              style={styles.checkRow}
+              onPress={() => updateSiteDetails({ rainProtectedConfirmed: !siteDetails.rainProtectedConfirmed })}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, siteDetails.rainProtectedConfirmed && styles.checkboxChecked]}>
+                {siteDetails.rainProtectedConfirmed && (
+                  <Ionicons name="checkmark" size={13} color={Colors.textWhite} />
+                )}
+              </View>
+              <View style={styles.checkTextCol}>
+                <Text style={styles.checkLabel}>Rain protected location confirmed</Text>
+                {!siteDetails.rainProtectedConfirmed && (
+                  <Text style={styles.checkWarning}>
+                    ⚠️ Required to continue outdoor installation
                   </Text>
                 )}
               </View>

@@ -8,6 +8,7 @@ export interface SiteDetails {
   address: string;
   isIndoor: boolean;
   roomSizeConfirmed: boolean;
+  rainProtectedConfirmed: boolean;
   systemType: string;
   notes: string;
 }
@@ -52,6 +53,7 @@ export const DEFAULT_SITE_DETAILS: SiteDetails = {
   address: '14 Sunridge Ave, Utrecht',
   isIndoor: true,
   roomSizeConfirmed: true,
+  rainProtectedConfirmed: false,
   systemType: 'SolarEdge Nexis 3ph',
   notes: '',
 };
