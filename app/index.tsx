@@ -119,6 +119,16 @@ export default function HomeScreen() {
 
   const cards: CardConfig[] = [
     {
+      icon: 'clipboard-outline',
+      iconBg: Colors.iconBoxAccent,
+      iconColor: Colors.accent,
+      title: 'Physical Installation',
+      subtitle: 'Physical installation procedure for a new system',
+      tappable: true,
+      isNew: true,
+      onPress: () => router.push('/site-details'),
+    },
+    {
       icon: 'business-outline',
       iconBg: Colors.iconBoxBlue,
       iconColor: Colors.iconBlue,
@@ -141,16 +151,6 @@ export default function HomeScreen() {
       title: 'Replace',
       subtitle: 'Inverter or Optimizer',
       tappable: false,
-    },
-    {
-      icon: 'clipboard-outline',
-      iconBg: Colors.iconBoxAccent,
-      iconColor: Colors.accent,
-      title: 'Physical Installation',
-      subtitle: '',
-      tappable: true,
-      isNew: true,
-      onPress: () => router.push('/site-details'),
     },
   ];
 
