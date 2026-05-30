@@ -37,25 +37,35 @@ function OptionCard({
       onPress={disabled ? undefined : onSelect}
       activeOpacity={disabled ? 1 : 0.8}
     >
-      {/* Radio */}
       <View style={[styles.radio, selected && styles.radioSelected]}>
         {selected && <View style={styles.radioInner} />}
       </View>
 
-      {/* Text */}
       <View style={styles.optionTextCol}>
         <Text style={[styles.optionTitle, selected && styles.optionTitleSelected, disabled && styles.optionTitleDisabled]}>
           {title}
         </Text>
-        <Text style={styles.optionDesc}>
-          {description}
-        </Text>
+        <Text style={styles.optionDesc}>{description}</Text>
         {disabled && disabledNote && (
           <View style={styles.comingSoonPill}>
             <Text style={styles.comingSoonText}>{disabledNote}</Text>
           </View>
         )}
       </View>
+    </TouchableOpacity>
+  );
+}
+
+// ─── Add custom checklist card ────────────────────────────────────────────────
+
+function AddCustomCard() {
+  return (
+    <TouchableOpacity style={styles.addCard} activeOpacity={0.7} onPress={() => {}}>
+      <View style={styles.addIconBox}>
+        <Ionicons name="add" size={22} color={Colors.textSecondary} />
+      </View>
+      <Text style={styles.addCardText}>Add custom checklist</Text>
+      <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
     </TouchableOpacity>
   );
 }
@@ -67,8 +77,10 @@ export default function ProcedureSelectionScreen() {
   const { selectedProcedure, setProcedure } = useInstallation();
 
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <AppHeader title="Checklist Selection" showBack />
+    <View style={styles.screen}>
+      <SafeAreaView edges={['top']} style={styles.headerSafe}>
+        <AppHeader title="Checklist Selection" showBack />
+      </SafeAreaView>
 
       <ScrollView
         style={styles.scroll}
@@ -97,7 +109,11 @@ export default function ProcedureSelectionScreen() {
           onSelect={() => {}}
         />
 
-        {/* CTA */}
+        <AddCustomCard />
+      </ScrollView>
+
+      {/* Sticky bottom button */}
+      <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
         <TouchableOpacity
           style={styles.ctaBtn}
           onPress={() => router.push('/step')}
@@ -106,35 +122,31 @@ export default function ProcedureSelectionScreen() {
           <Text style={styles.ctaBtnText}>Begin Installation</Text>
           <Ionicons name="arrow-forward" size={18} color={Colors.textWhite} />
         </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const SELECTED_COLOR = Colors.headerBg; // #0D1B2A navy
-const SELECTED_BG = '#EEF1F4';          // very light navy tint
+const SELECTED_COLOR = Colors.headerBg;
+const SELECTED_BG = '#EEF1F4';
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.bodyBg },
+  headerSafe: { backgroundColor: Colors.headerBg },
   scroll: { flex: 1 },
   scrollContent: {
     padding: 16,
     gap: 12,
-    paddingBottom: 32,
+    paddingBottom: 24,
   },
 
-  headerBlock: { paddingBottom: 4, gap: 4 },
+  headerBlock: { paddingBottom: 4 },
   heading: {
     fontSize: 20,
     fontWeight: '700',
     color: Colors.textPrimary,
-  },
-  subheading: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
   },
 
   // Option cards
@@ -161,7 +173,6 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
 
-  // Radio
   radio: {
     width: 22,
     height: 22,
@@ -172,9 +183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 2,
   },
-  radioSelected: {
-    borderColor: SELECTED_COLOR,
-  },
+  radioSelected: { borderColor: SELECTED_COLOR },
   radioInner: {
     width: 10,
     height: 10,
@@ -182,30 +191,20 @@ const styles = StyleSheet.create({
     backgroundColor: SELECTED_COLOR,
   },
 
-  // Text
   optionTextCol: { flex: 1, gap: 4 },
   optionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  optionTitleSelected: {
-    color: SELECTED_COLOR,
-    fontWeight: '700',
-  },
-  optionTitleDisabled: {
-    color: Colors.textSecondary,
-  },
+  optionTitleSelected: { color: SELECTED_COLOR, fontWeight: '700' },
+  optionTitleDisabled: { color: Colors.textSecondary },
   optionDesc: {
     fontSize: 13,
     color: Colors.textSecondary,
     lineHeight: 18,
   },
-  optionDescDisabled: {
-    color: Colors.textMuted,
-  },
 
-  // Coming soon pill
   comingSoonPill: {
     alignSelf: 'flex-start',
     backgroundColor: Colors.iconBoxGray,
@@ -221,23 +220,42 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // Info box
-  infoBox: {
+  // Add custom checklist card
+  addCard: {
+    backgroundColor: Colors.cardBg,
+    borderRadius: 12,
+    padding: 16,
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    backgroundColor: Colors.iconBoxBlue,
-    borderRadius: 10,
-    padding: 12,
+    alignItems: 'center',
+    gap: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
   },
-  infoText: {
+  addIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: Colors.iconBoxGray,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addCardText: {
     flex: 1,
-    fontSize: 13,
-    color: Colors.iconBlue,
-    lineHeight: 18,
+    fontSize: 15,
+    fontWeight: '500',
+    color: Colors.textSecondary,
   },
 
-  // CTA
+  // Sticky bottom CTA
+  bottomBar: {
+    backgroundColor: Colors.bodyBg,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
   ctaBtn: {
     backgroundColor: Colors.accent,
     borderRadius: 12,
@@ -246,7 +264,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 4,
   },
   ctaBtnText: {
     fontSize: 16,
