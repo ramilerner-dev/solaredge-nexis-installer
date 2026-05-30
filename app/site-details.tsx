@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
-    marginTop: 18,
+    marginTop: 26,
     marginBottom: 2,
   },
   fieldLabel: {
