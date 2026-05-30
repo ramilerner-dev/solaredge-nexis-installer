@@ -47,7 +47,7 @@ function OptionCard({
         <Text style={[styles.optionTitle, selected && styles.optionTitleSelected, disabled && styles.optionTitleDisabled]}>
           {title}
         </Text>
-        <Text style={[styles.optionDesc, disabled && styles.optionDescDisabled]}>
+        <Text style={styles.optionDesc}>
           {description}
         </Text>
         {disabled && disabledNote && (
@@ -68,7 +68,7 @@ export default function ProcedureSelectionScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <AppHeader title="Installation Type" showBack />
+      <AppHeader title="Checklist Selection" showBack />
 
       <ScrollView
         style={styles.scroll}
@@ -83,7 +83,7 @@ export default function ProcedureSelectionScreen() {
           value="solaredge"
           selected={selectedProcedure === 'solaredge'}
           title="SolarEdge"
-          description="Official Nexis 3ph Quick Installation Guide. Covers all mechanical, electrical, and commissioning steps."
+          description="Official Nexis 3ph Quick Installation Guide (updated: Feb 2026)"
           onSelect={() => setProcedure('solaredge')}
         />
 
@@ -91,7 +91,7 @@ export default function ProcedureSelectionScreen() {
           value="tpo"
           selected={selectedProcedure === 'tpo'}
           title="Palmetto Finance TPO"
-          description="Adds TPO-specific requirements on top of all SolarEdge steps. For TPO-financed jobs only."
+          description="Palmetto Finance checklist for Nexis 3ph installation (updated: TBD)"
           disabled
           disabledNote="Coming soon"
           onSelect={() => {}}
