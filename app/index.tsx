@@ -139,7 +139,6 @@ export default function HomeScreen() {
       iconBg: Colors.iconBoxBlue,
       iconColor: Colors.iconBlue,
       title: 'Commission',
-      titleNote: '(previously Install)',
       subtitle: 'New system',
       tappable: false,
     },
