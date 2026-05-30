@@ -14,16 +14,28 @@ interface OptionCardProps {
   selected: boolean;
   title: string;
   description: string;
-  tag?: string;
+  disabled?: boolean;
+  disabledNote?: string;
   onSelect: () => void;
 }
 
-function OptionCard({ value, selected, title, description, tag, onSelect }: OptionCardProps) {
+function OptionCard({
+  selected,
+  title,
+  description,
+  disabled = false,
+  disabledNote,
+  onSelect,
+}: OptionCardProps) {
   return (
     <TouchableOpacity
-      style={[styles.optionCard, selected && styles.optionCardSelected]}
-      onPress={onSelect}
-      activeOpacity={0.8}
+      style={[
+        styles.optionCard,
+        selected && styles.optionCardSelected,
+        disabled && styles.optionCardDisabled,
+      ]}
+      onPress={disabled ? undefined : onSelect}
+      activeOpacity={disabled ? 1 : 0.8}
     >
       {/* Radio */}
       <View style={[styles.radio, selected && styles.radioSelected]}>
@@ -32,17 +44,17 @@ function OptionCard({ value, selected, title, description, tag, onSelect }: Opti
 
       {/* Text */}
       <View style={styles.optionTextCol}>
-        <View style={styles.optionTitleRow}>
-          <Text style={[styles.optionTitle, selected && styles.optionTitleSelected]}>
-            {title}
-          </Text>
-          {tag && (
-            <View style={styles.tag}>
-              <Text style={styles.tagText}>{tag}</Text>
-            </View>
-          )}
-        </View>
-        <Text style={styles.optionDesc}>{description}</Text>
+        <Text style={[styles.optionTitle, selected && styles.optionTitleSelected, disabled && styles.optionTitleDisabled]}>
+          {title}
+        </Text>
+        <Text style={[styles.optionDesc, disabled && styles.optionDescDisabled]}>
+          {description}
+        </Text>
+        {disabled && disabledNote && (
+          <View style={styles.comingSoonPill}>
+            <Text style={styles.comingSoonText}>{disabledNote}</Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -53,10 +65,6 @@ function OptionCard({ value, selected, title, description, tag, onSelect }: Opti
 export default function ProcedureSelectionScreen() {
   const router = useRouter();
   const { selectedProcedure, setProcedure } = useInstallation();
-
-  const handleBegin = () => {
-    router.push('/step');
-  };
 
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
@@ -85,10 +93,11 @@ export default function ProcedureSelectionScreen() {
         <OptionCard
           value="tpo"
           selected={selectedProcedure === 'tpo'}
-          title="TPO"
-          tag="Palmetto Finance"
-          description="Adds TPO-specific requirements on top of all SolarEdge steps. Select only for TPO-financed jobs."
-          onSelect={() => setProcedure('tpo')}
+          title="Palmetto Finance TPO"
+          description="Adds TPO-specific requirements on top of all SolarEdge steps. For TPO-financed jobs only."
+          disabled
+          disabledNote="Coming soon"
+          onSelect={() => {}}
         />
 
         {/* Info box */}
@@ -100,7 +109,11 @@ export default function ProcedureSelectionScreen() {
         </View>
 
         {/* CTA */}
-        <TouchableOpacity style={styles.ctaBtn} onPress={handleBegin} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.ctaBtn}
+          onPress={() => router.push('/step')}
+          activeOpacity={0.8}
+        >
           <Text style={styles.ctaBtnText}>Begin Installation</Text>
           <Ionicons name="arrow-forward" size={18} color={Colors.textWhite} />
         </TouchableOpacity>
@@ -111,6 +124,9 @@ export default function ProcedureSelectionScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
+const SELECTED_COLOR = Colors.headerBg; // #0D1B2A navy
+const SELECTED_BG = '#EEF1F4';          // very light navy tint
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.bodyBg },
   scroll: { flex: 1 },
@@ -120,10 +136,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
 
-  headerBlock: {
-    paddingBottom: 4,
-    gap: 4,
-  },
+  headerBlock: { paddingBottom: 4, gap: 4 },
   heading: {
     fontSize: 20,
     fontWeight: '700',
@@ -152,11 +165,14 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   optionCardSelected: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accentLight,
+    borderColor: SELECTED_COLOR,
+    backgroundColor: SELECTED_BG,
+  },
+  optionCardDisabled: {
+    opacity: 0.45,
   },
 
-  // Radio button
+  // Radio
   radio: {
     width: 22,
     height: 22,
@@ -168,48 +184,52 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   radioSelected: {
-    borderColor: Colors.accent,
+    borderColor: SELECTED_COLOR,
   },
   radioInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: Colors.accent,
+    backgroundColor: SELECTED_COLOR,
   },
 
-  // Text content
+  // Text
   optionTextCol: { flex: 1, gap: 4 },
-  optionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
   optionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.textPrimary,
   },
   optionTitleSelected: {
-    color: Colors.accent,
+    color: SELECTED_COLOR,
+    fontWeight: '700',
+  },
+  optionTitleDisabled: {
+    color: Colors.textSecondary,
   },
   optionDesc: {
     fontSize: 13,
     color: Colors.textSecondary,
     lineHeight: 18,
   },
-
-  // Tag pill
-  tag: {
-    backgroundColor: Colors.iconBoxBlue,
-    borderRadius: 6,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
+  optionDescDisabled: {
+    color: Colors.textMuted,
   },
-  tagText: {
+
+  // Coming soon pill
+  comingSoonPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.iconBoxGray,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginTop: 4,
+  },
+  comingSoonText: {
     fontSize: 11,
     fontWeight: '600',
-    color: Colors.iconBlue,
+    color: Colors.textSecondary,
+    letterSpacing: 0.3,
   },
 
   // Info box

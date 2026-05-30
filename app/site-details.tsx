@@ -38,8 +38,11 @@ export default function SiteDetailsScreen() {
   const router = useRouter();
   const { siteDetails, updateSiteDetails } = useInstallation();
 
-  const isValid = isSiteDetailsValid(siteDetails);
-  const errorMsg = siteDetailsError(siteDetails);
+  const roomSizeBlocking = siteDetails.isIndoor && !siteDetails.roomSizeConfirmed;
+  const isValid = isSiteDetailsValid(siteDetails) && !roomSizeBlocking;
+  const errorMsg = roomSizeBlocking
+    ? 'Room size ≥ 2,119 ft³ must be confirmed for indoor installations.'
+    : siteDetailsError(siteDetails);
 
   const handleNext = () => {
     if (isValid) router.push('/procedure-selection');
@@ -141,10 +144,10 @@ export default function SiteDetailsScreen() {
                 )}
               </View>
               <View style={styles.checkTextCol}>
-                <Text style={styles.checkLabel}>Room size ≥ 60 m³ confirmed</Text>
+                <Text style={styles.checkLabel}>Room size ≥ 2,119 ft³ confirmed</Text>
                 {!siteDetails.roomSizeConfirmed && (
                   <Text style={styles.checkWarning}>
-                    ⚠️ Required for indoor installation
+                    ⚠️ Required to continue indoor installation
                   </Text>
                 )}
               </View>
