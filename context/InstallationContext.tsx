@@ -37,11 +37,13 @@ interface InstallationContextType {
   currentStepIndex: number;
   steps: StepState[];
   markStepComplete: (stepIndex: number) => void;
+  toggleStepComplete: (stepIndex: number) => void;
   addPhoto: (stepIndex: number) => void;
   setCurrentStepIndex: (index: number) => void;
 
   // Session control
   installationInProgress: boolean;
+  beginInstallation: () => void;
   exitInstallation: (stepIndex: number) => void;
   startFresh: () => void;
 }
@@ -98,6 +100,18 @@ export function InstallationProvider({ children }: { children: React.ReactNode }
     }
   };
 
+  const toggleStepComplete = (stepIndex: number) => {
+    setSteps((prev) =>
+      prev.map((s, i) => {
+        if (i !== stepIndex) return s;
+        if (s.status === 'complete') {
+          return { ...s, status: 'pending' as StepStatus, completedAt: null };
+        }
+        return { ...s, status: 'complete' as StepStatus, completedAt: new Date().toISOString() };
+      })
+    );
+  };
+
   const addPhoto = (stepIndex: number) => {
     setSteps((prev) =>
       prev.map((s, i) => (i === stepIndex ? { ...s, photoCount: s.photoCount + 1 } : s))
@@ -124,7 +138,10 @@ export function InstallationProvider({ children }: { children: React.ReactNode }
     setInstallationInProgress(false);
   };
 
-  const beginInstallation = () => setInstallationInProgress(true);
+  const beginInstallation = () => {
+    setCurrentStepIndex(0);
+    setInstallationInProgress(true);
+  };
 
   return (
     <InstallationContext.Provider
@@ -136,9 +153,11 @@ export function InstallationProvider({ children }: { children: React.ReactNode }
         currentStepIndex,
         steps,
         markStepComplete,
+        toggleStepComplete,
         addPhoto,
         setCurrentStepIndex,
         installationInProgress,
+        beginInstallation,
         exitInstallation,
         startFresh,
       }}

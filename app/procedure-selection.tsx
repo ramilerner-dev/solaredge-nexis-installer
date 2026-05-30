@@ -71,7 +71,7 @@ function AddCustomFab() {
 
 export default function ProcedureSelectionScreen() {
   const router = useRouter();
-  const { selectedProcedure, setProcedure } = useInstallation();
+  const { selectedProcedure, setProcedure, beginInstallation } = useInstallation();
 
   return (
     <View style={styles.screen}>
@@ -115,7 +115,7 @@ export default function ProcedureSelectionScreen() {
       <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
         <TouchableOpacity
           style={styles.ctaBtn}
-          onPress={() => router.push('/step')}
+          onPress={() => { beginInstallation(); router.push('/step'); }}
           activeOpacity={0.8}
         >
           <Text style={styles.ctaBtnText}>Begin Installation</Text>

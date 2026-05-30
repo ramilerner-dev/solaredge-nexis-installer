@@ -44,6 +44,7 @@ function GoHeader() {
           source={require('@/assets/solaredge-logo.png')}
           style={headerStyles.logoImage}
           resizeMode="contain"
+          fadeDuration={0}
         />
         <View style={headerStyles.versionPill}>
           <Text style={headerStyles.versionText}>{APP_VERSION}</Text>
@@ -217,7 +218,7 @@ const headerStyles = StyleSheet.create({
   logoImage: {
     height: 30,
     width: 130,
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.headerBg,
   },
   versionPill: {
     backgroundColor: 'rgba(255,255,255,0.15)',
