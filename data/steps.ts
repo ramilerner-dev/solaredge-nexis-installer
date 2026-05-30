@@ -12,7 +12,7 @@ const STEPS: Step[] = [
     id: 1,
     title: 'Pre-Installation Planning',
     instructions: [
-      'Confirm installation location: Indoor (room ≥ 2,119 ft³) or Outdoor (rain-protected)',
+      'Confirm installation location: Indoor (room ≥ 2,200 ft³) or Outdoor (rain-protected)',
       'Verify inverter clearances: 12 in. top and bottom, 4 in. left and right',
       'Confirm installation order: Inverter → Battery → BUI/Meter (if applicable)',
       'Power OFF all devices and all circuit breakers before starting',

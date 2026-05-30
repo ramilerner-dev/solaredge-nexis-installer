@@ -25,7 +25,7 @@ export default function SiteDetailsScreen() {
   const rainBlocking = !siteDetails.isIndoor && !siteDetails.rainProtectedConfirmed;
   const isValid = isSiteDetailsValid(siteDetails) && !roomSizeBlocking && !rainBlocking;
   const errorMsg = roomSizeBlocking
-    ? 'Room size ≥ 2,119 ft³ must be confirmed for indoor installations.'
+    ? 'Room size ≥ 2,200 ft³ must be confirmed for indoor installations.'
     : rainBlocking
     ? 'Rain protected location must be confirmed for outdoor installations.'
     : siteDetailsError(siteDetails);
@@ -105,7 +105,7 @@ export default function SiteDetailsScreen() {
                 {siteDetails.roomSizeConfirmed && <Ionicons name="checkmark" size={12} color={Colors.textWhite} />}
               </View>
               <View style={styles.checkTextCol}>
-                <Text style={styles.checkLabel}>Room size ≥ 2,119 ft³ confirmed</Text>
+                <Text style={styles.checkLabel}>Room size ≥ 2,200 ft³ confirmed</Text>
                 {!siteDetails.roomSizeConfirmed && <Text style={styles.checkWarning}>⚠️ Required to continue</Text>}
               </View>
             </TouchableOpacity>
