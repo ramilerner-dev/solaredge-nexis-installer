@@ -123,7 +123,7 @@ export default function SiteDetailsScreen() {
             </TouchableOpacity>
           )}
 
-          <Text style={styles.fieldLabel}>System Type</Text>
+          <Text style={[styles.fieldLabel, styles.fieldLabelSpaced]}>System Type</Text>
           <View style={styles.inputDisabled}>
             <Text style={styles.inputDisabledText}>{siteDetails.systemType}</Text>
             <Ionicons name="lock-closed-outline" size={13} color={Colors.textMuted} />
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
-    marginTop: 10,
+    marginTop: 18,
     marginBottom: 2,
   },
   fieldLabel: {
@@ -195,6 +195,9 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     marginTop: 5,
     marginBottom: 2,
+  },
+  fieldLabelSpaced: {
+    marginTop: 14,
   },
   required: { color: Colors.danger },
 
