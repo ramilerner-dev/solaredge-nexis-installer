@@ -28,7 +28,7 @@ interface CardConfig {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const APP_VERSION = 'v0.0.4';
+const APP_VERSION = 'v0.0.5';
 
 function GoHeader() {
   return (
@@ -70,7 +70,7 @@ function WeatherWidget() {
         <Ionicons name="partly-sunny" size={16} color="#F59E0B" />
         <Text style={widgetStyles.temp}> 12°c</Text>
       </View>
-      <Text style={widgetStyles.welcome}>Welcome, Carlos!</Text>
+      <Text style={widgetStyles.welcome}>Welcome, John!</Text>
     </View>
   );
 }
