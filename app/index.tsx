@@ -27,7 +27,7 @@ interface CardConfig {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const APP_VERSION = 'v0.0.3';
+const APP_VERSION = 'v0.0.4';
 
 function GoHeader() {
   return (
@@ -85,7 +85,9 @@ function InstallCard({ card }: { card: CardConfig }) {
       {/* Text */}
       <View style={styles.cardText}>
         <Text style={styles.cardTitle}>{card.title}</Text>
-        <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
+        {card.subtitle.length > 0 && (
+          <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
+        )}
       </View>
 
       {/* NEW badge or chevron */}
@@ -145,7 +147,7 @@ export default function HomeScreen() {
       iconBg: Colors.iconBoxAccent,
       iconColor: Colors.accent,
       title: 'Physical Installation',
-      subtitle: 'Nexis guided install',
+      subtitle: '',
       tappable: true,
       isNew: true,
       onPress: () => router.push('/site-details'),

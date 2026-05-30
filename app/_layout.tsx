@@ -14,6 +14,7 @@ export default function RootLayout() {
           <Stack.Screen name="procedure-selection" />
           <Stack.Screen name="step" />
           <Stack.Screen name="summary" />
+          <Stack.Screen name="test-steps" />
         </Stack>
       </InstallationProvider>
     </SafeAreaProvider>

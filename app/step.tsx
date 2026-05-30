@@ -14,6 +14,9 @@ export default function StepScreen() {
         <TouchableOpacity style={styles.btn} onPress={() => router.push('/summary')}>
           <Text style={styles.btnText}>Go to Summary →</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={() => router.push('/test-steps')}>
+          <Text style={styles.btnText}>Phase 4 Image Test →</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -24,5 +27,6 @@ const styles = StyleSheet.create({
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24 },
   placeholder: { fontSize: 16, color: Colors.textSecondary },
   btn: { backgroundColor: Colors.accent, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 10 },
+  btnSecondary: { backgroundColor: Colors.headerBg },
   btnText: { color: '#fff', fontWeight: '600', fontSize: 16 },
 });
