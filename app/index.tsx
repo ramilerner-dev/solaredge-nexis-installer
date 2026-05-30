@@ -19,6 +19,7 @@ interface CardConfig {
   iconBg: string;
   iconColor: string;
   title: string;
+  titleNote?: string; // rendered inline after title in gray
   subtitle: string;
   tappable: boolean;
   isNew?: boolean;
@@ -84,7 +85,12 @@ function InstallCard({ card }: { card: CardConfig }) {
 
       {/* Text */}
       <View style={styles.cardText}>
-        <Text style={styles.cardTitle}>{card.title}</Text>
+        <Text style={styles.cardTitle}>
+          {card.title}
+          {card.titleNote && (
+            <Text style={styles.cardTitleNote}> {card.titleNote}</Text>
+          )}
+        </Text>
         {card.subtitle.length > 0 && (
           <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
         )}
@@ -132,7 +138,8 @@ export default function HomeScreen() {
       icon: 'business-outline',
       iconBg: Colors.iconBoxBlue,
       iconColor: Colors.iconBlue,
-      title: 'Commission (previously Install)',
+      title: 'Commission',
+      titleNote: '(previously Install)',
       subtitle: 'New system',
       tappable: false,
     },
@@ -330,6 +337,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.textPrimary,
+  },
+  cardTitleNote: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: Colors.textSecondary,
   },
   cardSubtitle: {
     fontSize: 13,
