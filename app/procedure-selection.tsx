@@ -102,7 +102,6 @@ export default function ProcedureSelectionScreen() {
           title="Palmetto Finance TPO"
           description="Palmetto Finance checklist for Nexis 3ph installation (updated: TBD)"
           disabled
-          disabledNote="Coming soon"
           onSelect={() => {}}
         />
 
