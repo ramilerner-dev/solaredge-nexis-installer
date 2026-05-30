@@ -93,7 +93,7 @@ export default function SiteDetailsScreen() {
           <View style={styles.segmentRow}>
             <TouchableOpacity
               style={[styles.segment, siteDetails.isIndoor && styles.segmentActive]}
-              onPress={() => updateSiteDetails({ isIndoor: true })}
+              onPress={() => updateSiteDetails({ isIndoor: true, rainProtectedConfirmed: false })}
               activeOpacity={0.8}
             >
               <Ionicons name="home-outline" size={14} color={siteDetails.isIndoor ? Colors.textWhite : Colors.textSecondary} />
@@ -101,7 +101,7 @@ export default function SiteDetailsScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.segment, !siteDetails.isIndoor && styles.segmentActive]}
-              onPress={() => updateSiteDetails({ isIndoor: false })}
+              onPress={() => updateSiteDetails({ isIndoor: false, roomSizeConfirmed: false })}
               activeOpacity={0.8}
             >
               <Ionicons name="sunny-outline" size={14} color={!siteDetails.isIndoor ? Colors.textWhite : Colors.textSecondary} />
