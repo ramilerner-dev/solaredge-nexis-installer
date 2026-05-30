@@ -97,14 +97,6 @@ export default function ProcedureSelectionScreen() {
           onSelect={() => {}}
         />
 
-        {/* Info box */}
-        <View style={styles.infoBox}>
-          <Ionicons name="information-circle-outline" size={18} color={Colors.iconBlue} />
-          <Text style={styles.infoText}>
-            TPO checklist items are additive — all SolarEdge steps are always included.
-          </Text>
-        </View>
-
         {/* CTA */}
         <TouchableOpacity
           style={styles.ctaBtn}
