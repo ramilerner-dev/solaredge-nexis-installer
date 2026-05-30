@@ -56,16 +56,13 @@ function OptionCard({
   );
 }
 
-// ─── Add custom checklist card ────────────────────────────────────────────────
+// ─── Add custom checklist FAB ─────────────────────────────────────────────────
 
-function AddCustomCard() {
+function AddCustomFab() {
   return (
-    <TouchableOpacity style={styles.addCard} activeOpacity={0.7} onPress={() => {}}>
-      <View style={styles.addIconBox}>
-        <Ionicons name="add" size={22} color={Colors.textSecondary} />
-      </View>
-      <Text style={styles.addCardText}>Add custom checklist</Text>
-      <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+    <TouchableOpacity style={styles.fab} activeOpacity={0.8} onPress={() => {}}>
+      <Ionicons name="add" size={18} color={Colors.textSecondary} />
+      <Text style={styles.fabText}>Add custom checklist</Text>
     </TouchableOpacity>
   );
 }
@@ -82,35 +79,38 @@ export default function ProcedureSelectionScreen() {
         <AppHeader title="Checklist Selection" showBack />
       </SafeAreaView>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.headerBlock}>
-          <Text style={styles.heading}>Select Compliance Checklist</Text>
-        </View>
+      <View style={styles.contentArea}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.headerBlock}>
+            <Text style={styles.heading}>Select Compliance Checklist</Text>
+          </View>
 
-        <OptionCard
-          value="solaredge"
-          selected={selectedProcedure === 'solaredge'}
-          title="SolarEdge"
-          description="Official Nexis 3ph Quick Installation Guide (updated: Feb 2026)"
-          onSelect={() => setProcedure('solaredge')}
-        />
+          <OptionCard
+            value="solaredge"
+            selected={selectedProcedure === 'solaredge'}
+            title="SolarEdge"
+            description="Official Nexis 3ph Quick Installation Guide (updated: Feb 2026)"
+            onSelect={() => setProcedure('solaredge')}
+          />
 
-        <OptionCard
-          value="tpo"
-          selected={selectedProcedure === 'tpo'}
-          title="Palmetto Finance TPO"
-          description="Palmetto Finance checklist for Nexis 3ph installation (updated: TBD)"
-          disabled
-          disabledNote="Coming soon"
-          onSelect={() => {}}
-        />
+          <OptionCard
+            value="tpo"
+            selected={selectedProcedure === 'tpo'}
+            title="Palmetto Finance TPO"
+            description="Palmetto Finance checklist for Nexis 3ph installation (updated: TBD)"
+            disabled
+            disabledNote="Coming soon"
+            onSelect={() => {}}
+          />
+        </ScrollView>
 
-        <AddCustomCard />
-      </ScrollView>
+        {/* FAB — floats over scroll content, bottom-right */}
+        <AddCustomFab />
+      </View>
 
       {/* Sticky bottom button */}
       <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
@@ -135,11 +135,12 @@ const SELECTED_BG = '#EEF1F4';
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.bodyBg },
   headerSafe: { backgroundColor: Colors.headerBg },
+  contentArea: { flex: 1 },
   scroll: { flex: 1 },
   scrollContent: {
     padding: 16,
     gap: 12,
-    paddingBottom: 24,
+    paddingBottom: 80, // leave room so FAB doesn't cover last card
   },
 
   headerBlock: { paddingBottom: 4 },
@@ -220,29 +221,28 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // Add custom checklist card
-  addCard: {
-    backgroundColor: Colors.cardBg,
-    borderRadius: 12,
-    padding: 16,
+  // FAB — Add custom checklist
+  fab: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    borderWidth: 1.5,
+    gap: 6,
+    backgroundColor: Colors.cardBg,
+    borderRadius: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderWidth: 1,
     borderColor: Colors.border,
-    borderStyle: 'dashed',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  addIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: Colors.iconBoxGray,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addCardText: {
-    flex: 1,
-    fontSize: 15,
+  fabText: {
+    fontSize: 14,
     fontWeight: '500',
     color: Colors.textSecondary,
   },
