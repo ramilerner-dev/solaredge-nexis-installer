@@ -9,7 +9,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { useInstallation, type SiteDetails, type StepState } from '@/context/InstallationContext';
 import STEPS, { type Step } from '@/data/steps';
-import { storageEstimate, formatTimestamp } from '@/utils/validation';
+import { storageEstimate, formatTimestamp, buildPdfFilename } from '@/utils/validation';
 import { totalPhotos, completedCount } from '@/utils/stepUtils';
 
 function escapeHtml(s: string): string {
@@ -142,7 +142,15 @@ function buildSummaryHtml(args: {
 
 export default function SummaryScreen() {
   const router = useRouter();
-  const { currentStepIndex, steps, siteDetails, setCurrentStepIndex } = useInstallation();
+  const {
+    currentStepIndex,
+    steps,
+    siteDetails,
+    setCurrentStepIndex,
+    saveOrUpdateActiveInstallation,
+    history,
+    activeEntryId,
+  } = useInstallation();
 
   const completed = completedCount(steps);
   const totalSteps = steps.length;
@@ -150,6 +158,7 @@ export default function SummaryScreen() {
   const storage = storageEstimate(photosTotal);
   const allComplete = completed === totalSteps;
   const [navSheetVisible, setNavSheetVisible] = useState(false);
+  const [shareSheetVisible, setShareSheetVisible] = useState(false);
 
   const handleBackToInstallation = () => {
     const targetIndex = allComplete ? 0 : currentStepIndex;
@@ -166,7 +175,13 @@ export default function SummaryScreen() {
     router.replace('/');
   };
 
-  const handleShare = async () => {
+  const handleSaveInstallation = () => {
+    saveOrUpdateActiveInstallation();
+    Alert.alert('Saved', 'Installation saved to history.');
+  };
+
+  const handleSharePdf = async () => {
+    setShareSheetVisible(false);
     try {
       const html = buildSummaryHtml({
         siteDetails,
@@ -182,7 +197,8 @@ export default function SummaryScreen() {
         throw new Error('PDF generation returned no data');
       }
 
-      const destUri = `${FileSystem.documentDirectory}installation-summary.pdf`;
+      const filename = buildPdfFilename(history, activeEntryId);
+      const destUri = `${FileSystem.documentDirectory}${filename}`;
       await FileSystem.writeAsStringAsync(destUri, base64, {
         encoding: FileSystem.EncodingType.Base64,
       });
@@ -197,9 +213,15 @@ export default function SummaryScreen() {
         dialogTitle: 'Share Installation Summary',
         UTI: 'com.adobe.pdf',
       });
+      saveOrUpdateActiveInstallation();
     } catch (err) {
       Alert.alert('Share failed', String(err));
     }
+  };
+
+  const handleUploadToSiteCapture = () => {
+    setShareSheetVisible(false);
+    saveOrUpdateActiveInstallation();
   };
 
   return (
@@ -207,7 +229,9 @@ export default function SummaryScreen() {
       {/* Header */}
       <SafeAreaView edges={['top']} style={styles.headerSafe}>
         <View style={styles.header}>
-          <View style={styles.headerSpacer} />
+          <TouchableOpacity style={styles.headerBtn} onPress={handleBackToInstallation} activeOpacity={0.7}>
+            <Ionicons name="chevron-back" size={24} color={Colors.textWhite} />
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Installation Summary</Text>
           <View style={styles.headerSpacer} />
         </View>
@@ -307,17 +331,17 @@ export default function SummaryScreen() {
         </View>
 
         {/* Actions */}
-        <TouchableOpacity style={styles.shareBtn} onPress={handleShare} activeOpacity={0.8}>
-          <Ionicons name="share-outline" size={20} color={Colors.textWhite} />
-          <Text style={styles.shareBtnText}>Share Summary</Text>
-        </TouchableOpacity>
+        <View style={styles.actionRow}>
+          <TouchableOpacity style={styles.primaryBtnHalf} onPress={handleSaveInstallation} activeOpacity={0.8}>
+            <Ionicons name="save-outline" size={18} color={Colors.textWhite} />
+            <Text style={styles.primaryBtnHalfText}>Save Installation</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.secondaryBtn} onPress={handleBackToInstallation} activeOpacity={0.8}>
-          <Ionicons name="arrow-forward-circle-outline" size={20} color={Colors.textPrimary} />
-          <Text style={styles.secondaryBtnText}>
-            {allComplete ? 'Review from Step 1' : 'Back to Installation'}
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.primaryBtnHalf} onPress={() => setShareSheetVisible(true)} activeOpacity={0.8}>
+            <Ionicons name="share-outline" size={18} color={Colors.textWhite} />
+            <Text style={styles.primaryBtnHalfText}>Share Summary</Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.secondaryBtn} onPress={handleGoHome} activeOpacity={0.8}>
           <Ionicons name="home-outline" size={20} color={Colors.textSecondary} />
@@ -370,6 +394,58 @@ export default function SummaryScreen() {
           </TouchableOpacity>
         </View>
       </Modal>
+
+      {/* Share chooser sheet — PDF or SiteCapture */}
+      <Modal
+        visible={shareSheetVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShareSheetVisible(false)}
+      >
+        <TouchableOpacity
+          style={shareSheet.overlay}
+          activeOpacity={1}
+          onPress={() => setShareSheetVisible(false)}
+        />
+        <View style={shareSheet.container}>
+          <View style={shareSheet.handle} />
+          <Text style={shareSheet.title}>Share Installation</Text>
+          <Text style={shareSheet.subtitle}>How would you like to share this installation?</Text>
+          <View style={shareSheet.divider} />
+
+          <TouchableOpacity style={shareSheet.option} onPress={handleSharePdf} activeOpacity={0.7}>
+            <View style={[shareSheet.optionIconBox, { backgroundColor: Colors.accentLight }]}>
+              <Ionicons name="document-text-outline" size={22} color={Colors.accent} />
+            </View>
+            <View style={shareSheet.optionTextCol}>
+              <Text style={shareSheet.optionTitle}>Share PDF Summary</Text>
+              <Text style={shareSheet.optionSubtitle}>Generate a PDF and share via any app</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={shareSheet.option} onPress={handleUploadToSiteCapture} activeOpacity={0.7}>
+            <View style={[shareSheet.optionIconBox, { backgroundColor: Colors.iconBoxBlue }]}>
+              <Ionicons name="cloud-upload-outline" size={22} color={Colors.iconBlue} />
+            </View>
+            <View style={shareSheet.optionTextCol}>
+              <Text style={shareSheet.optionTitle}>Photos Organizer</Text>
+              <Text style={shareSheet.optionSubtitle}>
+                Upload {photosTotal} {photosTotal === 1 ? 'photo' : 'photos'} to SiteCapture.com
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={shareSheet.cancel}
+            onPress={() => setShareSheetVisible(false)}
+            activeOpacity={0.7}
+          >
+            <Text style={shareSheet.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -387,6 +463,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.headerBg,
   },
   headerSpacer: { width: 44 },
+  headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '600', color: Colors.textWhite },
 
   // Scroll
@@ -487,16 +564,19 @@ const styles = StyleSheet.create({
   stepTimestamp: { fontSize: 12, color: Colors.textMuted, fontWeight: '500' },
 
   // Buttons
-  shareBtn: {
+  actionRow: { flexDirection: 'row', gap: 10 },
+  primaryBtnHalf: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
     backgroundColor: Colors.accent,
     borderRadius: 12,
-    paddingVertical: 15,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
   },
-  shareBtnText: { fontSize: 15, fontWeight: '700', color: Colors.textWhite },
+  primaryBtnHalfText: { fontSize: 14, fontWeight: '700', color: Colors.textWhite },
 
   secondaryBtn: {
     flexDirection: 'row',
@@ -543,6 +623,50 @@ const navSheet = StyleSheet.create({
     paddingHorizontal: 8,
   },
   optionText: { fontSize: 16, color: Colors.textPrimary, fontWeight: '500' },
+
+  cancel: { paddingVertical: 14, alignItems: 'center', marginTop: 6 },
+  cancelText: { fontSize: 15, color: Colors.textSecondary, fontWeight: '600' },
+});
+
+const shareSheet = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  container: {
+    backgroundColor: Colors.cardBg,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+    paddingTop: 12,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    backgroundColor: Colors.border,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 8,
+  },
+  title: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary, textAlign: 'center' },
+  subtitle: { fontSize: 13, color: Colors.textSecondary, textAlign: 'center', marginTop: 2 },
+  divider: { height: 1, backgroundColor: Colors.border, marginVertical: 12 },
+
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+  },
+  optionIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionTextCol: { flex: 1, gap: 2 },
+  optionTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
+  optionSubtitle: { fontSize: 12, color: Colors.textSecondary },
 
   cancel: { paddingVertical: 14, alignItems: 'center', marginTop: 6 },
   cancelText: { fontSize: 15, color: Colors.textSecondary, fontWeight: '600' },

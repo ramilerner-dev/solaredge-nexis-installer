@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import BottomNav from '@/components/BottomNav';
+import HistoryListModal from '@/components/HistoryListModal';
 import { useInstallation } from '@/context/InstallationContext';
 import STEPS from '@/data/steps';
 import { completedCount } from '@/utils/stepUtils';
@@ -33,7 +34,7 @@ interface CardConfig {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const APP_VERSION = 'v0.1.0';
+const APP_VERSION = 'v0.1.1';
 
 // ─── Resume Bottom Sheet ──────────────────────────────────────────────────────
 
@@ -184,9 +185,10 @@ function InstallCard({ card }: { card: CardConfig }) {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { installationInProgress, currentStepIndex, startFresh } = useInstallation();
+  const { installationInProgress, currentStepIndex, startFresh, history } = useInstallation();
   const { steps } = useInstallation();
   const [resumeSheetVisible, setResumeSheetVisible] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
 
   const completed = completedCount(steps);
   const savedStepNumber = currentStepIndex + 1;
@@ -268,12 +270,35 @@ export default function HomeScreen() {
         {cards.map((card) => (
           <InstallCard key={card.title} card={card} />
         ))}
+
+        <View style={styles.otherDivider} />
+        <Text style={styles.otherLabel}>OTHER</Text>
+        <TouchableOpacity
+          style={styles.historyRow}
+          onPress={() => setHistoryVisible(true)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="time-outline" size={20} color={Colors.textPrimary} />
+          <Text style={styles.historyRowLabel}>Installation History</Text>
+          {history.length > 0 && (
+            <Text style={styles.historyCount}>{history.length} saved</Text>
+          )}
+          <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Bottom nav */}
       <SafeAreaView style={styles.navSafe} edges={['bottom']}>
         <BottomNav activeTab="install" />
       </SafeAreaView>
+
+      {/* Installation history modal */}
+      <HistoryListModal
+        visible={historyVisible}
+        onClose={() => setHistoryVisible(false)}
+        onResumeNavigate={() => router.push('/step')}
+        onStartNewNavigate={() => router.push('/site-details')}
+      />
 
       {/* Resume installation sheet */}
       <ResumeSheet
@@ -454,6 +479,36 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     letterSpacing: 0.5,
   },
+
+  // OTHER section
+  otherDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.border,
+    marginTop: 18,
+    marginBottom: 10,
+  },
+  otherLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+    marginLeft: 4,
+    marginBottom: 4,
+  },
+  historyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: Colors.cardBg,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  historyRowLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
+  historyCount: { fontSize: 13, color: Colors.textSecondary, fontWeight: '500' },
 });
 
 const sheetStyles = StyleSheet.create({

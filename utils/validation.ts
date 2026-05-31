@@ -40,3 +40,30 @@ export function formatTimestamp(iso: string | null): string {
   const mm = minutes < 10 ? `0${minutes}` : `${minutes}`;
   return `${hours}:${mm} ${ampm}`;
 }
+
+/** Returns yy-mm-dd from a Date. */
+export function shortDateYYMMDD(d: Date): string {
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yy}-${mm}-${dd}`;
+}
+
+/**
+ * Builds the PDF filename for an installation summary share.
+ * Counts installations from the same local date (excluding the current one by id),
+ * always appends an index starting at 1.
+ *
+ * Format: `yy-mm-dd installation summary N.pdf`
+ */
+export function buildPdfFilename(
+  historyEntries: Array<{ id: string; date: string }>,
+  currentEntryId: string | null,
+  now: Date = new Date()
+): string {
+  const todayShort = shortDateYYMMDD(now);
+  const otherTodayCount = historyEntries.filter(
+    (e) => e.id !== currentEntryId && shortDateYYMMDD(new Date(e.date)) === todayShort
+  ).length;
+  return `${todayShort} installation summary ${otherTodayCount + 1}.pdf`;
+}
