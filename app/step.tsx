@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   Image,
   Modal,
+  Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +18,9 @@ import { Colors } from '@/constants/Colors';
 import { useInstallation } from '@/context/InstallationContext';
 import STEPS from '@/data/steps';
 import DiagramImages from '@/constants/DiagramImages';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const DIAGRAM_HEIGHT = Math.round(SCREEN_HEIGHT * 0.42);
 
 // ─── Bottom Sheet ─────────────────────────────────────────────────────────────
 
@@ -75,6 +81,7 @@ export default function StepScreen() {
 
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
   const [diagramModalVisible, setDiagramModalVisible] = useState(false);
+  const [currentDiagramIndex, setCurrentDiagramIndex] = useState(0);
 
   const stepData = STEPS[currentStepIndex];
   const stepState = steps[currentStepIndex];
@@ -82,6 +89,12 @@ export default function StepScreen() {
   const isComplete = stepState?.status === 'complete';
   const totalSteps = STEPS.length;
   const isLastStep = currentStepIndex === totalSteps - 1;
+  const hasMultipleDiagrams = stepData?.diagramFiles.length > 1;
+
+  // Reset diagram page when step changes
+  useEffect(() => {
+    setCurrentDiagramIndex(0);
+  }, [currentStepIndex]);
 
   const handleBack = () => {
     if (currentStepIndex > 0) {
@@ -110,9 +123,14 @@ export default function StepScreen() {
     setPhotoSheetVisible(false);
   };
 
+  const handleDiagramScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const page = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+    setCurrentDiagramIndex(page);
+  };
+
   if (!stepData) return null;
 
-  const diagramSource = DiagramImages[stepData.diagramFiles[0]];
+  const currentDiagramSource = DiagramImages[stepData.diagramFiles[currentDiagramIndex]];
 
   return (
     <View style={styles.screen}>
@@ -129,39 +147,71 @@ export default function StepScreen() {
         </View>
       </SafeAreaView>
 
-      {/* Scrollable content */}
+      {/* Diagram carousel — always visible at top */}
+      <View style={styles.diagramSection}>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={handleDiagramScroll}
+          style={styles.diagramScroll}
+        >
+          {stepData.diagramFiles.map((file) => (
+            <TouchableOpacity
+              key={file}
+              onPress={() => setDiagramModalVisible(true)}
+              activeOpacity={0.95}
+              style={styles.diagramPage}
+            >
+              <Image
+                source={DiagramImages[file]}
+                style={styles.diagramImage}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Expand icon */}
+        <TouchableOpacity
+          style={styles.expandBtn}
+          onPress={() => setDiagramModalVisible(true)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="expand-outline" size={16} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Dot indicators — only when multiple diagrams */}
+        {hasMultipleDiagrams && (
+          <View style={styles.dotsRow}>
+            {stepData.diagramFiles.map((_, i) => (
+              <View key={i} style={[styles.dot, i === currentDiagramIndex && styles.dotActive]} />
+            ))}
+          </View>
+        )}
+      </View>
+
+      {/* Scrollable instructions */}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Step title */}
         <Text style={styles.stepTitle}>{stepData.title}</Text>
 
-        {/* Instructions */}
         <View style={styles.instructionList}>
           {stepData.instructions.map((line, i) => (
             <View key={i} style={styles.instructionRow}>
-              <Text style={styles.bullet}>•</Text>
+              <View style={styles.numberCircle}>
+                <Text style={styles.numberText}>{i + 1}</Text>
+              </View>
               <Text style={styles.instructionText}>{line}</Text>
             </View>
           ))}
         </View>
 
-        {/* Pass criteria */}
         {stepData.hasPassCriteria && stepData.passNote && (
           <View style={styles.passCriteriaBox}>
             <Ionicons name="checkmark-circle-outline" size={16} color={Colors.success} />
             <Text style={styles.passCriteriaText}>{stepData.passNote}</Text>
           </View>
         )}
-
-        {/* Diagram — tap to enlarge */}
-        <TouchableOpacity onPress={() => setDiagramModalVisible(true)} activeOpacity={0.9}>
-          <View style={styles.diagramContainer}>
-            <Image source={diagramSource} style={styles.diagram} resizeMode="contain" />
-            <View style={styles.diagramHint}>
-              <Ionicons name="expand-outline" size={13} color={Colors.textMuted} />
-              <Text style={styles.diagramHintText}>Tap to enlarge</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
       </ScrollView>
 
       {/* Bottom bar */}
@@ -173,7 +223,6 @@ export default function StepScreen() {
           </View>
         )}
 
-        {/* Row 1: Add Photo + Mark Complete toggle */}
         <View style={styles.topActionRow}>
           <TouchableOpacity style={styles.photoBtn} onPress={() => setPhotoSheetVisible(true)} activeOpacity={0.8}>
             <Ionicons name="camera-outline" size={18} color={Colors.textSecondary} />
@@ -196,7 +245,6 @@ export default function StepScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Row 2: Next Step (full width) */}
         <TouchableOpacity style={styles.nextBtn} onPress={handleNextStep} activeOpacity={0.8}>
           <Text style={styles.nextBtnText}>{isLastStep ? 'Finish' : 'Next Step'}</Text>
           <Ionicons
@@ -219,7 +267,7 @@ export default function StepScreen() {
         onClose={() => setPhotoSheetVisible(false)}
       />
 
-      {/* Diagram fullscreen modal */}
+      {/* Fullscreen diagram modal */}
       <Modal
         visible={diagramModalVisible}
         transparent={false}
@@ -237,7 +285,7 @@ export default function StepScreen() {
             </TouchableOpacity>
           </SafeAreaView>
           <View style={styles.diagramModalBody}>
-            <Image source={diagramSource} style={styles.diagramFullscreen} resizeMode="contain" />
+            <Image source={currentDiagramSource} style={styles.diagramFullscreen} resizeMode="contain" />
           </View>
         </View>
       </Modal>
@@ -262,20 +310,79 @@ const styles = StyleSheet.create({
   headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '600', color: Colors.textWhite },
 
-  // Content
+  // Diagram section
+  diagramSection: {
+    height: DIAGRAM_HEIGHT,
+    backgroundColor: Colors.cardBg,
+  },
+  diagramScroll: { flex: 1 },
+  diagramPage: {
+    width: SCREEN_WIDTH,
+    height: DIAGRAM_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  diagramImage: {
+    width: SCREEN_WIDTH,
+    height: DIAGRAM_HEIGHT,
+  },
+  expandBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    borderRadius: 18,
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dotsRow: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.border,
+  },
+  dotActive: {
+    width: 18,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.headerBg,
+  },
+
+  // Instructions
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 24, gap: 14 },
 
   stepTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
 
-  // Instructions
-  instructionList: { gap: 8 },
-  instructionRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
-  bullet: { fontSize: 15, color: Colors.accent, fontWeight: '700', marginTop: 1 },
+  instructionList: { gap: 12 },
+  instructionRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+  numberCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    marginTop: 1,
+  },
+  numberText: { fontSize: 12, fontWeight: '700', color: Colors.textWhite },
   instructionText: { flex: 1, fontSize: 14, color: Colors.textPrimary, lineHeight: 20 },
 
   // Pass criteria
@@ -289,26 +396,6 @@ const styles = StyleSheet.create({
   },
   passCriteriaText: { flex: 1, fontSize: 13, color: Colors.success, lineHeight: 18 },
 
-  // Diagram
-  diagramContainer: {
-    backgroundColor: Colors.cardBg,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    overflow: 'hidden',
-  },
-  diagram: { width: '100%', height: 340 },
-  diagramHint: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  diagramHintText: { fontSize: 12, color: Colors.textMuted },
-
   // Bottom bar
   bottomBar: {
     backgroundColor: Colors.cardBg,
@@ -319,14 +406,8 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     gap: 10,
   },
-  photoCountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
+  photoCountRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   photoCountText: { fontSize: 13, color: Colors.success, fontWeight: '500' },
-
-  // Row 1
   topActionRow: { flexDirection: 'row', gap: 10 },
 
   photoBtn: {
@@ -362,7 +443,6 @@ const styles = StyleSheet.create({
   toggleBtnText: { fontSize: 14, fontWeight: '600', color: Colors.textSecondary },
   toggleBtnCheckedText: { color: Colors.textWhite },
 
-  // Row 2
   nextBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -374,7 +454,7 @@ const styles = StyleSheet.create({
   },
   nextBtnText: { fontSize: 15, fontWeight: '700', color: Colors.textWhite },
 
-  // Diagram fullscreen modal
+  // Fullscreen modal
   diagramModal: { flex: 1, backgroundColor: '#000' },
   diagramModalSafe: { backgroundColor: '#000' },
   diagramModalClose: {
@@ -386,16 +466,13 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   diagramModalBody: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  diagramFullscreen: { width: '100%', height: '100%' },
+  diagramFullscreen: { width: SCREEN_WIDTH, height: '100%' },
 });
 
 // ─── Bottom sheet styles ───────────────────────────────────────────────────────
 
 const sheet = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
   container: {
     backgroundColor: Colors.cardBg,
     borderTopLeftRadius: 20,

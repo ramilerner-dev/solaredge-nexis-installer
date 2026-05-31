@@ -1,7 +1,6 @@
 import {
   applyMarkStepComplete,
   applyAddPhoto,
-  applyExitInstallation,
   applyStartFresh,
   totalPhotos,
   completedCount,
@@ -67,28 +66,6 @@ describe('applyAddPhoto', () => {
   });
 });
 
-// ─── applyExitInstallation ────────────────────────────────────────────────────
-
-describe('applyExitInstallation', () => {
-  it('sets a pending step to in-progress', () => {
-    const result = applyExitInstallation(makeSteps(), 2);
-    expect(result[2].status).toBe('in-progress');
-  });
-
-  it('does not change a step that is already complete', () => {
-    let steps = applyMarkStepComplete(makeSteps(), 2);
-    steps = applyExitInstallation(steps, 2);
-    expect(steps[2].status).toBe('complete');
-  });
-
-  it('leaves all other steps as pending', () => {
-    const result = applyExitInstallation(makeSteps(), 2);
-    result.forEach((s, i) => {
-      if (i !== 2) expect(s.status).toBe('pending');
-    });
-  });
-});
-
 // ─── applyStartFresh ─────────────────────────────────────────────────────────
 
 describe('applyStartFresh', () => {
@@ -126,7 +103,6 @@ describe('completedCount', () => {
     let steps = makeSteps();
     steps = applyMarkStepComplete(steps, 0);
     steps = applyMarkStepComplete(steps, 1);
-    steps = applyExitInstallation(steps, 2);
     expect(completedCount(steps)).toBe(2);
   });
 

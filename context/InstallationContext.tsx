@@ -16,7 +16,7 @@ export interface SiteDetails {
 
 export type Procedure = 'solaredge' | 'tpo';
 
-export type StepStatus = 'pending' | 'in-progress' | 'complete';
+export type StepStatus = 'pending' | 'complete';
 
 export interface StepState {
   status: StepStatus;
@@ -56,7 +56,7 @@ export const DEFAULT_SITE_DETAILS: SiteDetails = {
   installerName: 'John Smith',
   address: '14 Sunridge Ave, California',
   isIndoor: true,
-  roomSizeConfirmed: true,
+  roomSizeConfirmed: false,
   rainProtectedConfirmed: false,
   systemType: 'SolarEdge Nexis 3ph',
   notes: '',
@@ -119,15 +119,7 @@ export function InstallationProvider({ children }: { children: React.ReactNode }
   };
 
   const exitInstallation = (stepIndex: number) => {
-    setSteps((prev) =>
-      prev.map((s, i) => {
-        if (i === stepIndex && s.status === 'pending') {
-          return { ...s, status: 'in-progress' as StepStatus };
-        }
-        return s;
-      })
-    );
-    setInstallationInProgress(false);
+    setCurrentStepIndex(stepIndex);
   };
 
   const startFresh = () => {

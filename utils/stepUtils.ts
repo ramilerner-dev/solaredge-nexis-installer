@@ -14,14 +14,6 @@ export function applyAddPhoto(steps: StepState[], stepIndex: number): StepState[
   );
 }
 
-export function applyExitInstallation(steps: StepState[], stepIndex: number): StepState[] {
-  return steps.map((s, i) =>
-    i === stepIndex && s.status === 'pending'
-      ? { ...s, status: 'in-progress' as StepStatus }
-      : s
-  );
-}
-
 export function applyStartFresh(steps: StepState[]): StepState[] {
   return steps.map(() => ({ status: 'pending' as StepStatus, photoCount: 0, completedAt: null }));
 }

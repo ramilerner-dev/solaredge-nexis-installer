@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,16 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import BottomNav from '@/components/BottomNav';
+import { useInstallation } from '@/context/InstallationContext';
+import STEPS from '@/data/steps';
+import { completedCount } from '@/utils/stepUtils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,7 +33,60 @@ interface CardConfig {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const APP_VERSION = 'v0.0.5';
+const APP_VERSION = 'v0.1.0';
+
+// ─── Resume Bottom Sheet ──────────────────────────────────────────────────────
+
+function ResumeSheet({
+  visible,
+  stepNumber,
+  totalSteps,
+  stepTitle,
+  completed,
+  onResume,
+  onStartFresh,
+  onClose,
+}: {
+  visible: boolean;
+  stepNumber: number;
+  totalSteps: number;
+  stepTitle: string;
+  completed: number;
+  onResume: () => void;
+  onStartFresh: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <TouchableOpacity style={sheetStyles.overlay} activeOpacity={1} onPress={onClose} />
+      <View style={sheetStyles.container}>
+        <View style={sheetStyles.handle} />
+        <Text style={sheetStyles.title}>Resume Installation?</Text>
+        <Text style={sheetStyles.subtitle}>
+          You have an installation in progress at Step {stepNumber} of {totalSteps}.
+        </Text>
+        <Text style={sheetStyles.stepLine}>{stepTitle}</Text>
+        <Text style={sheetStyles.progressLine}>
+          {completed} of {totalSteps} steps completed
+        </Text>
+
+        <TouchableOpacity style={sheetStyles.resumeBtn} onPress={onResume} activeOpacity={0.8}>
+          <Ionicons name="arrow-forward-circle" size={20} color={Colors.textWhite} />
+          <Text style={sheetStyles.resumeBtnText}>Resume Installation</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={sheetStyles.freshBtn} onPress={onStartFresh} activeOpacity={0.8}>
+          <Ionicons name="refresh" size={18} color={Colors.danger} />
+          <Text style={sheetStyles.freshBtnText}>Start Fresh</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={sheetStyles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
+          <Text style={sheetStyles.cancelBtnText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  );
+}
 
 function GoHeader() {
   return (
@@ -127,6 +184,32 @@ function InstallCard({ card }: { card: CardConfig }) {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { installationInProgress, currentStepIndex, startFresh } = useInstallation();
+  const { steps } = useInstallation();
+  const [resumeSheetVisible, setResumeSheetVisible] = useState(false);
+
+  const completed = completedCount(steps);
+  const savedStepNumber = currentStepIndex + 1;
+  const savedStepTitle = STEPS[currentStepIndex]?.title ?? '';
+
+  const handleInstallTap = () => {
+    if (installationInProgress) {
+      setResumeSheetVisible(true);
+    } else {
+      router.push('/site-details');
+    }
+  };
+
+  const handleResume = () => {
+    setResumeSheetVisible(false);
+    router.push('/step');
+  };
+
+  const handleStartFresh = () => {
+    setResumeSheetVisible(false);
+    startFresh();
+    router.push('/site-details');
+  };
 
   const cards: CardConfig[] = [
     {
@@ -134,10 +217,12 @@ export default function HomeScreen() {
       iconBg: Colors.iconBoxAccent,
       iconColor: Colors.accent,
       title: 'Install',
-      subtitle: 'Physical installation procedure',
+      subtitle: installationInProgress
+        ? `In progress — Step ${savedStepNumber} of ${STEPS.length}`
+        : 'Physical installation procedure',
       tappable: true,
       isNew: true,
-      onPress: () => router.push('/site-details'),
+      onPress: handleInstallTap,
     },
     {
       icon: 'business-outline',
@@ -189,6 +274,18 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.navSafe} edges={['bottom']}>
         <BottomNav activeTab="install" />
       </SafeAreaView>
+
+      {/* Resume installation sheet */}
+      <ResumeSheet
+        visible={resumeSheetVisible}
+        stepNumber={savedStepNumber}
+        totalSteps={STEPS.length}
+        stepTitle={savedStepTitle}
+        completed={completed}
+        onResume={handleResume}
+        onStartFresh={handleStartFresh}
+        onClose={() => setResumeSheetVisible(false)}
+      />
     </View>
   );
 }
@@ -357,4 +454,58 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     letterSpacing: 0.5,
   },
+});
+
+const sheetStyles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  container: {
+    backgroundColor: Colors.cardBg,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+    paddingTop: 12,
+    gap: 6,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    backgroundColor: Colors.border,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  title: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary, textAlign: 'center' },
+  subtitle: { fontSize: 14, color: Colors.textSecondary, textAlign: 'center', marginTop: 4 },
+  stepLine: { fontSize: 14, color: Colors.textPrimary, textAlign: 'center', fontWeight: '600', marginTop: 6 },
+  progressLine: { fontSize: 13, color: Colors.textSecondary, textAlign: 'center', marginBottom: 14 },
+
+  resumeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.accent,
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 6,
+  },
+  resumeBtnText: { fontSize: 15, fontWeight: '700', color: Colors.textWhite },
+
+  freshBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: Colors.cardBg,
+    borderRadius: 12,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginTop: 8,
+  },
+  freshBtnText: { fontSize: 14, fontWeight: '600', color: Colors.danger },
+
+  cancelBtn: { paddingVertical: 12, alignItems: 'center', marginTop: 4 },
+  cancelBtnText: { fontSize: 14, color: Colors.textSecondary, fontWeight: '600' },
 });
