@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,15 @@ import { isSiteDetailsValid, siteDetailsError } from '@/utils/validation';
 export default function SiteDetailsScreen() {
   const router = useRouter();
   const { siteDetails, updateSiteDetails } = useInstallation();
+
+  const customerRef = useRef<TextInput>(null);
+  const siteRef = useRef<TextInput>(null);
+  const installerRef = useRef<TextInput>(null);
+  const addressRef = useRef<TextInput>(null);
+  const notesRef = useRef<TextInput>(null);
+
+  const customerMissing = !siteDetails.customerName.trim();
+  const siteMissing = !siteDetails.siteName.trim();
 
   const roomSizeBlocking = siteDetails.isIndoor && !siteDetails.roomSizeConfirmed;
   const rainBlocking = !siteDetails.isIndoor && !siteDetails.rainProtectedConfirmed;
@@ -43,114 +52,138 @@ export default function SiteDetailsScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* ── Site Information ── */}
+          {/* ── Site Information (single-block card with row dividers) ── */}
           <Text style={styles.sectionHeader}>Site Information</Text>
+          <View style={styles.card}>
+            <View style={[styles.row, customerMissing && styles.rowError]}>
+              <Text style={[styles.rowLabel, customerMissing && styles.rowLabelError]}>
+                Customer Name <Text style={styles.required}>*</Text>
+              </Text>
+              <TextInput
+                ref={customerRef}
+                style={styles.rowInput}
+                value={siteDetails.customerName}
+                onChangeText={(v) => updateSiteDetails({ customerName: v })}
+                placeholder="e.g. Andrea Smith"
+                placeholderTextColor={Colors.textMuted}
+                returnKeyType="next"
+                onSubmitEditing={() => siteRef.current?.focus()}
+              />
+            </View>
 
-          <Text style={styles.fieldLabel}>Customer Name <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={[styles.input, !siteDetails.customerName.trim() && styles.inputError]}
-            value={siteDetails.customerName}
-            onChangeText={(v) => updateSiteDetails({ customerName: v })}
-            placeholder="e.g. Andrea Smith"
-            placeholderTextColor={Colors.textMuted}
-            returnKeyType="next"
-          />
+            <View style={[styles.row, styles.rowDivider, siteMissing && styles.rowError]}>
+              <Text style={[styles.rowLabel, siteMissing && styles.rowLabelError]}>
+                Site Name <Text style={styles.required}>*</Text>
+              </Text>
+              <TextInput
+                ref={siteRef}
+                style={styles.rowInput}
+                value={siteDetails.siteName}
+                onChangeText={(v) => updateSiteDetails({ siteName: v })}
+                placeholder="e.g. Green Valley Solar"
+                placeholderTextColor={Colors.textMuted}
+                returnKeyType="next"
+                onSubmitEditing={() => installerRef.current?.focus()}
+              />
+            </View>
 
-          <Text style={styles.fieldLabel}>Site Name <Text style={styles.required}>*</Text></Text>
-          <TextInput
-            style={[styles.input, !siteDetails.siteName.trim() && styles.inputError]}
-            value={siteDetails.siteName}
-            onChangeText={(v) => updateSiteDetails({ siteName: v })}
-            placeholder="e.g. Green Valley Solar"
-            placeholderTextColor={Colors.textMuted}
-            returnKeyType="next"
-          />
+            <View style={[styles.row, styles.rowDivider]}>
+              <Text style={styles.rowLabel}>Installer Name</Text>
+              <TextInput
+                ref={installerRef}
+                style={styles.rowInput}
+                value={siteDetails.installerName}
+                onChangeText={(v) => updateSiteDetails({ installerName: v })}
+                placeholder="e.g. John Smith"
+                placeholderTextColor={Colors.textMuted}
+                returnKeyType="next"
+                onSubmitEditing={() => addressRef.current?.focus()}
+              />
+            </View>
 
-          <Text style={styles.fieldLabel}>Installer Name</Text>
-          <TextInput
-            style={styles.input}
-            value={siteDetails.installerName}
-            onChangeText={(v) => updateSiteDetails({ installerName: v })}
-            placeholder="e.g. John Smith"
-            placeholderTextColor={Colors.textMuted}
-            returnKeyType="next"
-          />
+            <View style={[styles.row, styles.rowDivider]}>
+              <Text style={styles.rowLabel}>Site Address</Text>
+              <TextInput
+                ref={addressRef}
+                style={styles.rowInput}
+                value={siteDetails.address}
+                onChangeText={(v) => updateSiteDetails({ address: v })}
+                placeholder="e.g. 14 Sunridge Ave, California"
+                placeholderTextColor={Colors.textMuted}
+                returnKeyType="done"
+              />
+            </View>
+          </View>
 
-          <Text style={styles.fieldLabel}>Site Address</Text>
-          <TextInput
-            style={styles.input}
-            value={siteDetails.address}
-            onChangeText={(v) => updateSiteDetails({ address: v })}
-            placeholder="e.g. 14 Sunridge Ave, California"
-            placeholderTextColor={Colors.textMuted}
-            returnKeyType="next"
-          />
-
-          {/* ── Installation Details ── */}
+          {/* ── Installation Details (card frame, existing controls preserved) ── */}
           <Text style={styles.sectionHeader}>Installation Details</Text>
+          <View style={styles.cardPadded}>
+            <Text style={[styles.fieldLabel, styles.fieldLabelFirst]}>Location</Text>
+            <View style={styles.segmentRow}>
+              <TouchableOpacity
+                style={[styles.segment, siteDetails.isIndoor && styles.segmentActive]}
+                onPress={() => updateSiteDetails({ isIndoor: true, rainProtectedConfirmed: false })}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="home-outline" size={14} color={siteDetails.isIndoor ? Colors.textWhite : Colors.textSecondary} />
+                <Text style={[styles.segmentText, siteDetails.isIndoor && styles.segmentTextActive]}>Indoor</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.segment, !siteDetails.isIndoor && styles.segmentActive]}
+                onPress={() => updateSiteDetails({ isIndoor: false, roomSizeConfirmed: false })}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="sunny-outline" size={14} color={!siteDetails.isIndoor ? Colors.textWhite : Colors.textSecondary} />
+                <Text style={[styles.segmentText, !siteDetails.isIndoor && styles.segmentTextActive]}>Outdoor</Text>
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styles.fieldLabel}>Location</Text>
-          <View style={styles.segmentRow}>
-            <TouchableOpacity
-              style={[styles.segment, siteDetails.isIndoor && styles.segmentActive]}
-              onPress={() => updateSiteDetails({ isIndoor: true, rainProtectedConfirmed: false })}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="home-outline" size={14} color={siteDetails.isIndoor ? Colors.textWhite : Colors.textSecondary} />
-              <Text style={[styles.segmentText, siteDetails.isIndoor && styles.segmentTextActive]}>Indoor</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.segment, !siteDetails.isIndoor && styles.segmentActive]}
-              onPress={() => updateSiteDetails({ isIndoor: false, roomSizeConfirmed: false })}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="sunny-outline" size={14} color={!siteDetails.isIndoor ? Colors.textWhite : Colors.textSecondary} />
-              <Text style={[styles.segmentText, !siteDetails.isIndoor && styles.segmentTextActive]}>Outdoor</Text>
-            </TouchableOpacity>
+            {siteDetails.isIndoor && (
+              <TouchableOpacity style={styles.checkRow} onPress={() => updateSiteDetails({ roomSizeConfirmed: !siteDetails.roomSizeConfirmed })} activeOpacity={0.7}>
+                <View style={[styles.checkbox, siteDetails.roomSizeConfirmed && styles.checkboxChecked]}>
+                  {siteDetails.roomSizeConfirmed && <Ionicons name="checkmark" size={12} color={Colors.textWhite} />}
+                </View>
+                <View style={styles.checkTextCol}>
+                  <Text style={styles.checkLabel}>Room size ≥ 2,200 ft³ confirmed</Text>
+                  {!siteDetails.roomSizeConfirmed && <Text style={styles.checkWarning}>⚠️ Required to continue</Text>}
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {!siteDetails.isIndoor && (
+              <TouchableOpacity style={styles.checkRow} onPress={() => updateSiteDetails({ rainProtectedConfirmed: !siteDetails.rainProtectedConfirmed })} activeOpacity={0.7}>
+                <View style={[styles.checkbox, siteDetails.rainProtectedConfirmed && styles.checkboxChecked]}>
+                  {siteDetails.rainProtectedConfirmed && <Ionicons name="checkmark" size={12} color={Colors.textWhite} />}
+                </View>
+                <View style={styles.checkTextCol}>
+                  <Text style={styles.checkLabel}>Rain protected location confirmed</Text>
+                  {!siteDetails.rainProtectedConfirmed && <Text style={styles.checkWarning}>⚠️ Required to continue</Text>}
+                </View>
+              </TouchableOpacity>
+            )}
+
+            <Text style={[styles.fieldLabel, styles.fieldLabelSpaced]}>System Type</Text>
+            <View style={styles.inputDisabled}>
+              <Text style={styles.inputDisabledText}>{siteDetails.systemType}</Text>
+              <Ionicons name="lock-closed-outline" size={13} color={Colors.textMuted} />
+            </View>
           </View>
 
-          {siteDetails.isIndoor && (
-            <TouchableOpacity style={styles.checkRow} onPress={() => updateSiteDetails({ roomSizeConfirmed: !siteDetails.roomSizeConfirmed })} activeOpacity={0.7}>
-              <View style={[styles.checkbox, siteDetails.roomSizeConfirmed && styles.checkboxChecked]}>
-                {siteDetails.roomSizeConfirmed && <Ionicons name="checkmark" size={12} color={Colors.textWhite} />}
-              </View>
-              <View style={styles.checkTextCol}>
-                <Text style={styles.checkLabel}>Room size ≥ 2,200 ft³ confirmed</Text>
-                {!siteDetails.roomSizeConfirmed && <Text style={styles.checkWarning}>⚠️ Required to continue</Text>}
-              </View>
-            </TouchableOpacity>
-          )}
-
-          {!siteDetails.isIndoor && (
-            <TouchableOpacity style={styles.checkRow} onPress={() => updateSiteDetails({ rainProtectedConfirmed: !siteDetails.rainProtectedConfirmed })} activeOpacity={0.7}>
-              <View style={[styles.checkbox, siteDetails.rainProtectedConfirmed && styles.checkboxChecked]}>
-                {siteDetails.rainProtectedConfirmed && <Ionicons name="checkmark" size={12} color={Colors.textWhite} />}
-              </View>
-              <View style={styles.checkTextCol}>
-                <Text style={styles.checkLabel}>Rain protected location confirmed</Text>
-                {!siteDetails.rainProtectedConfirmed && <Text style={styles.checkWarning}>⚠️ Required to continue</Text>}
-              </View>
-            </TouchableOpacity>
-          )}
-
-          <Text style={[styles.fieldLabel, styles.fieldLabelSpaced]}>System Type</Text>
-          <View style={styles.inputDisabled}>
-            <Text style={styles.inputDisabledText}>{siteDetails.systemType}</Text>
-            <Ionicons name="lock-closed-outline" size={13} color={Colors.textMuted} />
-          </View>
-
-          {/* ── Notes ── */}
+          {/* ── Notes (card frame, borderless textarea) ── */}
           <Text style={styles.sectionHeader}>Notes</Text>
-          <TextInput
-            style={styles.inputNotes}
-            value={siteDetails.notes}
-            onChangeText={(v) => updateSiteDetails({ notes: v })}
-            placeholder="Optional notes for this installation"
-            placeholderTextColor={Colors.textMuted}
-            multiline
-            numberOfLines={2}
-            textAlignVertical="top"
-          />
+          <View style={styles.cardPadded}>
+            <TextInput
+              ref={notesRef}
+              style={styles.notesInput}
+              value={siteDetails.notes}
+              onChangeText={(v) => updateSiteDetails({ notes: v })}
+              placeholder="Optional notes for this installation"
+              placeholderTextColor={Colors.textMuted}
+              multiline
+              numberOfLines={2}
+              textAlignVertical="top"
+            />
+          </View>
 
           {errorMsg && (
             <View style={styles.errorBox}>
@@ -187,7 +220,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 12,
     paddingBottom: 8,
-    gap: 3,
   },
 
   sectionHeader: {
@@ -196,43 +228,72 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
-    marginTop: 26,
-    marginBottom: 2,
+    marginTop: 22,
+    marginBottom: 6,
+    marginLeft: 4,
   },
+
+  // Card frames
+  card: {
+    backgroundColor: Colors.cardBg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    overflow: 'hidden',
+  },
+  cardPadded: {
+    backgroundColor: Colors.cardBg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 12,
+  },
+
+  // Settings-style rows (Site Information card)
+  row: {
+    paddingHorizontal: 14,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  rowDivider: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.border,
+  },
+  rowError: {
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.danger,
+    paddingLeft: 11,
+  },
+  rowLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: Colors.textSecondary,
+  },
+  rowLabelError: {
+    color: Colors.danger,
+  },
+  rowInput: {
+    fontSize: 15,
+    color: Colors.textPrimary,
+  },
+
+  required: { color: Colors.danger },
+
+  // Installation Details (preserved control styles, now inside cardPadded)
   fieldLabel: {
     fontSize: 13,
     fontWeight: '500',
     color: Colors.textPrimary,
     marginTop: 5,
-    marginBottom: 2,
+    marginBottom: 4,
+  },
+  fieldLabelFirst: {
+    marginTop: 0,
   },
   fieldLabelSpaced: {
     marginTop: 14,
   },
-  required: { color: Colors.danger },
 
-  input: {
-    backgroundColor: Colors.cardBg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 9,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    fontSize: 14,
-    color: Colors.textPrimary,
-  },
-  inputError: { borderColor: Colors.danger },
-  inputNotes: {
-    backgroundColor: Colors.cardBg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 9,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    fontSize: 14,
-    color: Colors.textPrimary,
-    height: 58,
-  },
   inputDisabled: {
     backgroundColor: Colors.divider,
     borderWidth: 1,
@@ -271,7 +332,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 10,
     paddingVertical: 3,
-    marginTop: 3,
+    marginTop: 8,
   },
   checkbox: {
     width: 19,
@@ -288,6 +349,14 @@ const styles = StyleSheet.create({
   checkLabel: { fontSize: 13, color: Colors.textPrimary, fontWeight: '500' },
   checkWarning: { fontSize: 11, color: Colors.warning },
 
+  // Notes (borderless textarea inside cardPadded)
+  notesInput: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+    minHeight: 50,
+  },
+
+  // Error summary + sticky CTA
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -295,7 +364,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF2F2',
     borderRadius: 8,
     padding: 9,
-    marginTop: 4,
+    marginTop: 12,
   },
   errorText: { fontSize: 12, color: Colors.danger, flex: 1 },
 

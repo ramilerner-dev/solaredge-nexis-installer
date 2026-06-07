@@ -73,12 +73,12 @@ function ResumeSheet({
 
         <TouchableOpacity style={sheetStyles.resumeBtn} onPress={onResume} activeOpacity={0.8}>
           <Ionicons name="arrow-forward-circle" size={20} color={Colors.textWhite} />
-          <Text style={sheetStyles.resumeBtnText}>Resume Installation</Text>
+          <Text style={sheetStyles.resumeBtnText}>Resume</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={sheetStyles.freshBtn} onPress={onStartFresh} activeOpacity={0.8}>
           <Ionicons name="refresh" size={18} color={Colors.danger} />
-          <Text style={sheetStyles.freshBtnText}>Start Fresh</Text>
+          <Text style={sheetStyles.freshBtnText}>New</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={sheetStyles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
